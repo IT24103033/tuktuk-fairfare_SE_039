@@ -1,3 +1,6 @@
+const { GoogleGenAI } = require('@google/genai');
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
 const benchmarkData = require('../data/benchmarks.json');
 
 // This will hold our standard LKR tuk-tuk rate formula
@@ -50,7 +53,32 @@ const getBenchmarks = (req, res) => {
     res.status(200).json(filteredData);
 };
 
+const assessFareAI = async (req, res) => {
+    const { driversQuote, calculatedStandardFare } = req.body || {};
+
+    if (!driversQuote || !calculatedStandardFare) {
+        return res.status(400).json({ error: "Missing driver's quote or standard fare." });
+    }
+
+    const prompt = `A tuk-tuk driver in Sri Lanka quoted a passenger ${driversQuote} LKR. The standard calculated fare for this distance should be ${calculatedStandardFare} LKR. Briefly assess if this is a fair price, a slight overcharge, or a scam. Suggest a polite counter-offer. Keep the response to 3 sentences maximum.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.6-flash',
+            contents: prompt
+        });
+
+        res.status(200).json({
+            assessment: response.text
+        });
+    } catch (error) {
+        console.error("AI Error:", error);
+        res.status(500).json({ error: "Failed to generate AI assessment." });
+    }
+};
+
 module.exports = {
     calculateFare,
-    getBenchmarks
+    getBenchmarks,
+    assessFareAI
 };
