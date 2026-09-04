@@ -8,6 +8,7 @@ import {
   Sparkles,
   RefreshCw,
 } from 'lucide-react'
+import { API_BASE_URL } from './apiConfig'
 
 // Local client fallback fare calculation logic
 const calculateFareFallback = (distanceKm, isNight) => {
@@ -73,7 +74,7 @@ export default function FareCalculator() {
 
     // Call Backend API endpoint POST /api/calculate
     try {
-      const response = await fetch('/api/calculate', {
+      const response = await fetch(`${API_BASE_URL}/api/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

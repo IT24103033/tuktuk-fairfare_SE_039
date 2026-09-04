@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { MessageSquare, Send, AlertTriangle, CheckCircle, Lightbulb, User, Clock, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
+import { API_BASE_URL } from './apiConfig'
 
 export default function CommentSection({ routeId, comments = [], onCommentAdded }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,7 +25,7 @@ export default function CommentSection({ routeId, comments = [], onCommentAdded 
     setError('')
 
     try {
-      const response = await fetch(`/api/benchmarks/${routeId}/comments`, {
+      const response = await fetch(`${API_BASE_URL}/api/benchmarks/${routeId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

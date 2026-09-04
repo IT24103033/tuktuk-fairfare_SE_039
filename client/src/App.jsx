@@ -3,6 +3,7 @@ import { Shield, MapPin, Info, Star, Search, RefreshCw, Wifi, WifiOff, PlusCircl
 import FareCalculator from './FareCalculator'
 import RouteCard from './RouteCard'
 import BenchmarkModal from './BenchmarkModal'
+import { API_BASE_URL } from './apiConfig'
 import './index.css'
 
 // Default fallback benchmark routes in Sri Lanka
@@ -56,8 +57,8 @@ export default function App() {
     setIsLoading(true)
     try {
       const url = search.trim()
-        ? `/api/benchmarks?search=${encodeURIComponent(search.trim())}`
-        : '/api/benchmarks'
+        ? `${API_BASE_URL}/api/benchmarks?search=${encodeURIComponent(search.trim())}`
+        : `${API_BASE_URL}/api/benchmarks`
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
@@ -144,7 +145,7 @@ export default function App() {
       let response
       if (editingRoute) {
         // PUT /api/benchmarks/:id
-        response = await fetch(`/api/benchmarks/${editingRoute.id}`, {
+        response = await fetch(`${API_BASE_URL}/api/benchmarks/${editingRoute.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
@@ -152,7 +153,7 @@ export default function App() {
       } else {
         // POST /api/benchmarks
         const newId = Math.floor(1000 + Math.random() * 9000)
-        response = await fetch('/api/benchmarks', {
+        response = await fetch(`${API_BASE_URL}/api/benchmarks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...formData, id: newId }),
@@ -181,7 +182,7 @@ export default function App() {
     }
 
     try {
-      const response = await fetch(`/api/benchmarks/${route.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/benchmarks/${route.id}`, {
         method: 'DELETE',
       })
       if (response.ok) {
