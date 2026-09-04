@@ -2,22 +2,121 @@
     {
         "id": 1,
         "route": "Colombo Airport (BIA) to Colombo Fort",
+        "region": "Colombo",
         "distanceKm": 32,
-        "estimatedFare": 2500,
-        "scamAlert": "Watch out for flat rates over LKR 4000. Insist on the meter or pre-negotiate."
+        "estimatedFare": 2900,
+        "travelTimeMin": 45,
+        "scamAlert": "Watch out for flat rates over LKR 4,500. Insist on meter or negotiate before entering.",
+        "sinhalaTip": "Meter eka danna puluwanda? (Can you put the meter?)"
     },
     {
         "id": 2,
-        "route": "Kandy Railway Station to Temple of the Tooth",
-        "distanceKm": 1.5,
-        "estimatedFare": 150,
-        "scamAlert": "Extremely short distance. Walkable, but if riding, do not pay over LKR 250."
+        "route": "Colombo Fort to Galle Face Green",
+        "region": "Colombo",
+        "distanceKm": 2.5,
+        "estimatedFare": 245,
+        "travelTimeMin": 10,
+        "scamAlert": "Heavy tourist spot. Drivers often ask LKR 700+. Walkable or maximum LKR 300.",
+        "sinhalaTip": "Galle Face ekata LKR 250k dhennam (I will give LKR 250 for Galle Face)"
     },
     {
         "id": 3,
+        "route": "Colombo Fort to Pettah Floating Market",
+        "region": "Colombo",
+        "distanceKm": 1.2,
+        "estimatedFare": 128,
+        "travelTimeMin": 5,
+        "scamAlert": "Extremely short ride. Refuse quotes above LKR 200.",
+        "sinhalaTip": "Pettah ekata meter ekata yamu (Let's go to Pettah on meter)"
+    },
+    {
+        "id": 4,
+        "route": "Kandy Railway Station to Temple of the Tooth",
+        "region": "Kandy & Hills",
+        "distanceKm": 1.5,
+        "estimatedFare": 155,
+        "travelTimeMin": 7,
+        "scamAlert": "Walkable route. If riding, do not pay over LKR 200–250.",
+        "sinhalaTip": "Dalada Maligawata LKR 200k hari (LKR 200 to Temple is fair)"
+    },
+    {
+        "id": 5,
+        "route": "Kandy City Centre to Peradeniya Botanical Gardens",
+        "region": "Kandy & Hills",
+        "distanceKm": 6.0,
+        "estimatedFare": 560,
+        "travelTimeMin": 20,
+        "scamAlert": "Popular tourist trip. Don't fall for drivers offering detour spice gardens.",
+        "sinhalaTip": "Peradeniya mal wattata kelinma yanna (Go directly to Peradeniya Gardens)"
+    },
+    {
+        "id": 6,
+        "route": "Ella Town to Nine Arch Bridge",
+        "region": "Kandy & Hills",
+        "distanceKm": 2.5,
+        "estimatedFare": 245,
+        "travelTimeMin": 12,
+        "scamAlert": "Station drivers quote LKR 800–1000. Agree strictly around LKR 300–400 for hilly terrain.",
+        "sinhalaTip": "Nine Arch Bridge ekata gaana keeyada? (How much to Nine Arch Bridge?)"
+    },
+    {
+        "id": 7,
+        "route": "Ella Town to Little Adam's Peak",
+        "region": "Kandy & Hills",
+        "distanceKm": 3.0,
+        "estimatedFare": 290,
+        "travelTimeMin": 15,
+        "scamAlert": "Often inflated for foreign backpackers. Fair price is under LKR 350.",
+        "sinhalaTip": "Little Adam's Peak ekata LKR 300k dhennam"
+    },
+    {
+        "id": 8,
         "route": "Galle Fort to Unawatuna Beach",
-        "distanceKm": 6,
-        "estimatedFare": 500,
-        "scamAlert": "Common tourist route. Drivers often ask for LKR 1000+. Show them the standard rate."
+        "region": "Down South",
+        "distanceKm": 6.0,
+        "estimatedFare": 560,
+        "travelTimeMin": 18,
+        "scamAlert": "Famous route. Drivers regularly quote LKR 1200+. State LKR 600 confidently.",
+        "sinhalaTip": "Unawatunata LKR 600k athi (LKR 600 is enough for Unawatuna)"
+    },
+    {
+        "id": 9,
+        "route": "Mirissa Beach to Weligama Bay",
+        "region": "Down South",
+        "distanceKm": 4.5,
+        "estimatedFare": 425,
+        "travelTimeMin": 15,
+        "scamAlert": "Popular surfer corridor. Avoid night-time double charging beyond the 15% rate.",
+        "sinhalaTip": "Weligamata LKR 450k hari neda? (LKR 450 to Weligama, right?)"
+    },
+    {
+        "id": 10,
+        "route": "Galle Bus Stand to Galle Dutch Fort",
+        "region": "Down South",
+        "distanceKm": 1.0,
+        "estimatedFare": 110,
+        "travelTimeMin": 4,
+        "scamAlert": "Literally around the corner. Maximum fare is LKR 150.",
+        "sinhalaTip": "Kotuwa athulatama yanna (Go inside the Fort)"
+    },
+    {
+        "id": 11,
+        "route": "Sigiriya Rock to Dambulla Cave Temple",
+        "region": "Cultural Triangle",
+        "distanceKm": 17.0,
+        "estimatedFare": 1550,
+        "travelTimeMin": 30,
+        "scamAlert": "Cross-town tourist journey. Drivers may quote LKR 3,500+. Fair range is LKR 1,600–1,900.",
+        "sinhalaTip": "Dambulla pahanata LKR 1700k dhennam"
+    },
+    {
+        "id": 12,
+        "route": "Negombo Beach Road to Bandaranaike Airport (BIA)",
+        "region": "Colombo",
+        "distanceKm": 11.0,
+        "estimatedFare": 1010,
+        "travelTimeMin": 25,
+        "scamAlert": "Airport departure rush scam. High demand so pre-arrange or settle near LKR 1,100.",
+        "sinhalaTip": "Airport ekata kelinma yanna (Go straight to the Airport)"
     }
 ]

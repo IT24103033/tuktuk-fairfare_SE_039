@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   MapPin,
   AlertTriangle,
@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
+  X,
 } from 'lucide-react'
 
 // Fare calculation logic
@@ -21,12 +22,25 @@ const calculateFare = (distanceKm, isNight) => {
   return Math.ceil(fare)
 }
 
-export default function FareCalculator() {
+export default function FareCalculator({ selectedRoute, onClearSelectedRoute }) {
   const [distance, setDistance] = useState('')
   const [isNight, setIsNight] = useState(false)
   const [error, setError] = useState('')
   const [fare, setFare] = useState(null)
   const [hasCalculated, setHasCalculated] = useState(false)
+  const [activeRouteName, setActiveRouteName] = useState('')
+
+  useEffect(() => {
+    if (selectedRoute && selectedRoute.distanceKm) {
+      const dist = selectedRoute.distanceKm.toString()
+      setDistance(dist)
+      setActiveRouteName(selectedRoute.route || `${selectedRoute.origin} to ${selectedRoute.destination}`)
+      setError('')
+      const result = calculateFare(parseFloat(dist), isNight)
+      setFare(result)
+      setHasCalculated(true)
+    }
+  }, [selectedRoute, isNight])
 
   const validate = (value) => {
     if (value === '' || value === null) {
@@ -114,6 +128,30 @@ export default function FareCalculator() {
         </div>
 
         <div className="space-y-5">
+          {/* Active Selected Route Pill */}
+          {activeRouteName && (
+            <div className="flex items-center justify-between gap-2 p-3 bg-blue-50/90 border border-blue-200 rounded-2xl animate-fade-in shadow-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Selected Route Autofilled</p>
+                  <p className="text-xs font-bold text-blue-950 truncate">{activeRouteName}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveRouteName('')
+                  if (onClearSelectedRoute) onClearSelectedRoute()
+                }}
+                className="p-1.5 text-blue-400 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition"
+                title="Clear selected route"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Distance Input */}
           <div>
             <label
