@@ -14,24 +14,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: 'Space Grotesk', sans-serif;
   letter-spacing: -0.02em;
 }
 
 /* Custom light scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #94a3b8;
 }
 
 /* Modern Toggle switch styles - Light Mode */
@@ -105,7 +106,7 @@ input:checked + .toggle-slider:before {
 
 .card-pop:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.1);
 }
 
 /* Animations */
@@ -114,8 +115,26 @@ input:checked + .toggle-slider:before {
   50% { box-shadow: 0 8px 30px rgba(37, 99, 235, 0.24); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .animate-soft-pulse {
   animation: soft-pulse 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .gradient-text {

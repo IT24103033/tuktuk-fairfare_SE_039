@@ -16,7 +16,12 @@ import {
   Check,
   X,
   ArrowRight,
-  ExternalLink,
+  ShieldAlert,
+  HelpCircle,
+  Car,
+  CheckCircle2,
+  Navigation2,
+  Compass,
 } from 'lucide-react'
 import FareCalculator from './FareCalculator'
 import RouteCard from './RouteCard'
@@ -172,6 +177,33 @@ const DEFAULT_BENCHMARK_ROUTES = [
 
 const REGIONS = ['All', 'Colombo', 'Kandy & Hills', 'Down South', 'Cultural Triangle']
 
+const TUKTUK_RULES = [
+  {
+    title: 'Ask for the Meter First',
+    desc: 'In Colombo & Kandy, look for "METERED TAXI" roofs. Politely ask "Meter daanawada?" before sitting.',
+    badge: 'Best Practice',
+    icon: CheckCircle2,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+  },
+  {
+    title: 'Pre-agree on Unmetered Rides',
+    desc: 'In down south beaches and hill country, tuk-tuks rarely have meters. Always state your FairFare rate before boarding.',
+    badge: 'Essential',
+    icon: DollarSign,
+    color: 'text-blue-600',
+    bg: 'bg-blue-50',
+  },
+  {
+    title: 'Decline "Closed Today" Detours',
+    desc: 'Never accept claims that your temple or attraction is closed. It is a common trick to steer you to commission shops.',
+    badge: 'Scam Alert',
+    icon: ShieldAlert,
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
+  },
+]
+
 export default function App() {
   const [routes, setRoutes] = useState(DEFAULT_BENCHMARK_ROUTES)
   const [searchQuery, setSearchQuery] = useState('')
@@ -226,7 +258,7 @@ export default function App() {
         }
       }
     } catch {
-      // Backend unavailable, fallback
+      // Offline fallback
     }
 
     // Client-side fallback filter
@@ -272,9 +304,9 @@ export default function App() {
   const handleUseInCalculator = (routeData) => {
     setCalculatorSelectedRoute(routeData)
     setActiveModalRoute(null)
-    const calcSection = document.getElementById('calc-heading')
+    const calcSection = document.getElementById('calc-section')
     if (calcSection) {
-      calcSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      calcSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -287,102 +319,141 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#ebf3fc] via-[#f1f6fd] to-[#e6effb] text-slate-900 selection:bg-blue-100 selection:text-blue-900">
-      {/* Subtle gentle blue ambient blobs */}
+    <div className="min-h-screen bg-gradient-to-b from-[#ebf3fc] via-[#f2f7fd] to-[#e7effb] text-slate-900 selection:bg-blue-100 selection:text-blue-900">
+      
+      {/* Subtle gentle blue ambient blooms */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-300/25 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-24 w-80 h-80 bg-sky-300/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-indigo-200/25 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-32 w-80 h-80 bg-sky-300/25 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14">
-
-        {/* ── HEADER BANNER ─────────────────────────────────────────── */}
-        <header className="mb-10 sm:mb-14">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            {/* Regulatory Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200/90 rounded-full shadow-xs">
-              <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-              <span className="text-xs font-semibold text-blue-800 tracking-wide">
-                Official Rate Guide · Sri Lanka
-              </span>
+      {/* ── TOP PROFESSIONAL NAVIGATION BAR ───────────────────────── */}
+      <nav className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 transition-all">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
+              <Navigation2 className="w-5 h-5 -rotate-45" />
             </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">TukTuk</span>
+                <span className="text-base sm:text-lg font-black gradient-text">FairFare</span>
+                <span className="text-xs">🇱🇰</span>
+              </div>
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider hidden sm:block">Sri Lanka Tourist Rate Verifier</p>
+            </div>
+          </div>
 
-            {/* Backend Connectivity Status Badge */}
+          {/* Quick Nav Anchors */}
+          <div className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+            <a href="#calc-section" className="hover:text-blue-600 transition">Fare Estimator</a>
+            <a href="#routes-section" className="hover:text-blue-600 transition">Benchmark Routes ({routes.length})</a>
+            <a href="#rules-section" className="hover:text-blue-600 transition">Tourist Safety Guide</a>
+          </div>
+
+          {/* Connectivity & Tariff Badge */}
+          <div className="flex items-center gap-2">
             <div
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-xs transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs transition-colors ${
                 isBackendConnected
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                  : 'bg-white border-slate-200 text-slate-600'
+                  : 'bg-slate-100 border-slate-200 text-slate-600'
               }`}
             >
               {isBackendConnected ? (
                 <>
                   <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Live API Connected</span>
+                  <span className="hidden sm:inline">Live API</span>
+                  <span className="sm:hidden">Online</span>
                 </>
               ) : (
                 <>
                   <WifiOff className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Offline Ready</span>
+                  <span>Offline</span>
                 </>
               )}
             </div>
           </div>
+        </div>
+      </nav>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-4 tracking-tight">
-            <span className="text-slate-950">TukTuk</span>{' '}
-            <span className="gradient-text">FairFare</span>
-          </h1>
+      {/* ── MAIN CONTENT CONTAINER ─────────────────────────────────── */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-          <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed mb-6 font-normal">
-            Sri Lanka's three-wheelers (tuk-tuks) are <strong className="text-slate-900 font-semibold">unmetered</strong>, 
-            and tourists are routinely overcharged — sometimes paying{' '}
-            <strong className="text-red-600 font-bold">3 to 5 times</strong> the standard local rate.
-            Click any benchmark route below to see driver negotiation phrases or calculate custom fares instantly.
-          </p>
+        {/* ── HERO & CALCULATOR SPLIT SECTION ───────────────────────── */}
+        <section id="calc-section" className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-16">
+          
+          {/* Left Column: Problem & Guidance */}
+          <div className="lg:col-span-6 space-y-6 pt-2">
+            
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200/90 rounded-full shadow-xs">
+              <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <span className="text-xs font-bold text-blue-800 tracking-wide uppercase">
+                Official Gazette Tariff · 2024–2026
+              </span>
+            </div>
 
-          {/* Stats row with subtle pop hover */}
-          <div className="flex flex-wrap gap-3.5 mt-6">
-            {[
-              { icon: Shield, label: 'Official Rates', value: 'LKR 110 base / +90 per km', color: 'text-blue-600', bg: 'bg-blue-50' },
-              { icon: MapPin, label: 'Verified Routes', value: `${routes.length} Available`, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-              { icon: Star, label: 'Night Surcharge', value: '+ 15% (10 PM – 5 AM)', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            ].map(({ icon: Icon, label, value, color, bg }) => (
-              <div
-                key={label}
-                className="btn-pop flex items-center gap-3 px-4 py-3 bg-white border border-slate-200/90 rounded-2xl shadow-xs cursor-default"
-              >
-                <div className={`p-2 rounded-xl ${bg} ${color}`}>
-                  <Icon className="w-4 h-4" />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
+              Know the <span className="gradient-text">Fair Tuk-Tuk Price</span> Before You Ride.
+            </h1>
+
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+              Most three-wheelers in Sri Lanka do not use digital meters. Foreign travellers are routinely quoted{' '}
+              <strong className="text-red-600 font-bold">2x to 5x the legal local rate</strong> in busy hubs like Colombo, Kandy, Galle, and Ella.
+            </p>
+
+            {/* How it Works 3-Step Pill Flow (Modern UX) */}
+            <div className="bg-white/80 backdrop-blur-sm border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-2.5">
+              <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                How to avoid getting overcharged:
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200/70">
+                  <span className="text-base font-black text-blue-600">1</span>
+                  <p className="text-[11px] font-bold text-slate-800 mt-0.5 leading-tight">Pick Distance</p>
+                  <p className="text-[10px] text-slate-400">or click a route</p>
                 </div>
-                <div>
-                  <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{label}</p>
-                  <p className="text-sm font-bold text-slate-900">{value}</p>
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200/70">
+                  <span className="text-base font-black text-blue-600">2</span>
+                  <p className="text-[11px] font-bold text-slate-800 mt-0.5 leading-tight">Get Legal Rate</p>
+                  <p className="text-[10px] text-slate-400">LKR 110 + 90/km</p>
+                </div>
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200/70">
+                  <span className="text-base font-black text-blue-600">3</span>
+                  <p className="text-[11px] font-bold text-slate-800 mt-0.5 leading-tight">Show Driver</p>
+                  <p className="text-[10px] text-slate-400">or use Sinhala tip</p>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Official Rates Summary Strip */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-1">
+                  <Shield className="w-4 h-4 text-blue-600" />
+                  <span>Day Rate Tariff</span>
+                </div>
+                <p className="text-base font-black text-slate-900">LKR 110 + 90/km</p>
+                <p className="text-[11px] text-slate-400">5:00 AM – 10:00 PM</p>
+              </div>
+
+              <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 mb-1">
+                  <Star className="w-4 h-4 text-indigo-600" />
+                  <span>Night Tariff</span>
+                </div>
+                <p className="text-base font-black text-indigo-950">+15% Surcharge</p>
+                <p className="text-[11px] text-slate-400">10:00 PM – 5:00 AM</p>
+              </div>
+            </div>
           </div>
 
-          {/* Info callout */}
-          <div className="mt-6 flex items-start gap-3 p-4 bg-blue-50/90 border border-blue-200 rounded-2xl max-w-2xl shadow-xs">
-            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-blue-950 font-medium leading-relaxed">
-              These rates reflect regulated legal guidance for three-wheeler fares.
-              Always agree on a price <em>before</em> entering. Click any route below to view local scam tips & negotiation scripts.
-            </p>
-          </div>
-        </header>
-
-        {/* ── FARE CALCULATOR ───────────────────────────────────────── */}
-        <section aria-labelledby="calc-heading" className="mb-14">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 id="calc-heading" className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Calculate Your Fare
-            </h2>
-            <div className="flex-1 h-px bg-slate-200" />
-          </div>
-          <div className="max-w-lg">
+          {/* Right Column: Fare Calculator Widget */}
+          <div className="lg:col-span-6">
             <FareCalculator
               selectedRoute={calculatorSelectedRoute}
               onClearSelectedRoute={() => setCalculatorSelectedRoute(null)}
@@ -390,32 +461,71 @@ export default function App() {
           </div>
         </section>
 
-        {/* ── BENCHMARK ROUTES DIRECTORY ────────────────────────────── */}
-        <section aria-labelledby="routes-heading">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+        {/* ── 3 GOLDEN RULES FOR TUK-TUKS SECTION ───────────────────── */}
+        <section id="rules-section" className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+              3 Golden Rules for Riding Tuk-Tuks
+            </h2>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {TUKTUK_RULES.map((rule) => {
+              const Icon = rule.icon
+              return (
+                <div
+                  key={rule.title}
+                  className="card-pop bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`p-2.5 rounded-xl ${rule.bg} ${rule.color}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                        {rule.badge}
+                      </span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 mb-1.5">
+                      {rule.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                      {rule.desc}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ── POPULAR BENCHMARK ROUTES DIRECTORY ────────────────────── */}
+        <section id="routes-section" className="mb-16">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <h2 id="routes-heading" className="text-xl sm:text-2xl font-extrabold text-slate-900">
-                  Popular Tourist Routes
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  Popular Tourist Routes Directory
                 </h2>
                 <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
-                  {displayedRoutes.length} Routes
+                  {displayedRoutes.length} of {routes.length}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Click any route card to view local scam warnings, driver phrases, or autofill into the calculator.
+                Verified travel price bands. Click any route card to see Sinhala negotiation phrases or autofill the calculator.
               </p>
             </div>
 
             {/* Live Search Input connected to GET /api/benchmarks?search= */}
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search any destination (e.g. Fort, Beach, Sigiriya)..."
-                className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition shadow-xs font-medium"
+                placeholder="Search destination (Fort, Beach, Ella)..."
+                className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition shadow-xs font-semibold"
               />
               {isLoading && (
                 <RefreshCw className="w-3.5 h-3.5 text-blue-600 absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin" />
@@ -423,7 +533,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Region Filter Tabs */}
+          {/* Region Filter Buttons */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
             {REGIONS.map((region) => (
               <button
@@ -452,7 +562,7 @@ export default function App() {
                 }}
                 className="btn-pop mt-3.5 inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 font-semibold text-xs rounded-xl border border-blue-200 hover:bg-blue-100 cursor-pointer"
               >
-                Clear search filter
+                Reset Search
               </button>
             </div>
           ) : (
@@ -477,10 +587,13 @@ export default function App() {
         </section>
 
         {/* ── FOOTER ────────────────────────────────────────────────── */}
-        <footer className="mt-16 pt-8 border-t border-slate-200/80 text-center">
-          <p className="text-xs text-slate-500 font-medium">
-            TukTuk FairFare · Empowering tourists with transparent pricing in Sri Lanka.
-            Fare rates are guidelines only and may vary slightly by region.
+        <footer className="pt-8 border-t border-slate-200 text-center text-xs text-slate-500 space-y-2">
+          <p className="font-semibold text-slate-700">
+            TukTuk FairFare · Sri Lanka Tourist Fare Verifier & Protection Guide
+          </p>
+          <p>
+            Based on provincial regulatory gazette guidelines (LKR 110 base / +90 per km). 
+            Always confirm destination and meter availability before starting your trip.
           </p>
         </footer>
       </div>
@@ -506,7 +619,7 @@ export default function App() {
 
             {/* Region badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg mb-3">
-              <MapPin className="w-3.5 h-3.5" />
+              <Compass className="w-3.5 h-3.5 text-blue-600" />
               <span>{activeModalRoute.region || 'Sri Lanka'}</span>
             </div>
 
