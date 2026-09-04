@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "route": "Colombo Airport (BIA) to Colombo Fort",
+        "distanceKm": 32,
+        "estimatedFare": 2500,
+        "scamAlert": "Watch out for flat rates over LKR 4000. Insist on the meter or pre-negotiate."
+    },
+    {
+        "id": 2,
+        "route": "Kandy Railway Station to Temple of the Tooth",
+        "distanceKm": 1.5,
+        "estimatedFare": 150,
+        "scamAlert": "Extremely short distance. Walkable, but if riding, do not pay over LKR 250."
+    },
+    {
+        "id": 3,
+        "route": "Galle Fort to Unawatuna Beach",
+        "distanceKm": 6,
+        "estimatedFare": 500,
+        "scamAlert": "Common tourist route. Drivers often ask for LKR 1000+. Show them the standard rate."
+    }
+]
