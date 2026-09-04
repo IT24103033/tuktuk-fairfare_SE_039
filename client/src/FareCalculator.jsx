@@ -6,12 +6,13 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
+  RefreshCw,
 } from 'lucide-react'
 
-// Fare calculation logic
-const calculateFare = (distanceKm, isNight) => {
+// Local client fallback fare calculation logic
+const calculateFareFallback = (distanceKm, isNight) => {
   if (!distanceKm || distanceKm <= 0) return null
-  let fare = 110 // First 1 km base rate
+  let fare = 110 // Base rate for 1st km
   if (distanceKm > 1) {
     fare += (distanceKm - 1) * 90
   }
@@ -27,6 +28,7 @@ export default function FareCalculator() {
   const [error, setError] = useState('')
   const [fare, setFare] = useState(null)
   const [hasCalculated, setHasCalculated] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
 
   const validate = (value) => {
     if (value === '' || value === null) {
@@ -38,8 +40,8 @@ export default function FareCalculator() {
       setError('Oops! That doesn\'t look like a valid number.')
       return false
     }
-    if (num < 0) {
-      setError('Distance can\'t be negative — try a positive number!')
+    if (num <= 0) {
+      setError('Distance can\'t be 0 or negative — try a positive number!')
       return false
     }
     if (num < 0.1) {
@@ -56,7 +58,6 @@ export default function FareCalculator() {
 
   const handleDistanceChange = (e) => {
     const val = e.target.value
-    // Block negative sign directly from input
     if (val.includes('-')) return
     setDistance(val)
     setHasCalculated(false)
@@ -68,13 +69,11 @@ export default function FareCalculator() {
   const handleCalculate = async () => {
     if (!validate(distance)) return
     const numDistance = parseFloat(distance)
-    const result = calculateFare(numDistance, isNight)
-    setFare(result)
-    setHasCalculated(true)
+    setIsCalculating(true)
 
-    // Also communicate with backend API (/api/calculate) when reachable
+    // Call Backend API endpoint POST /api/calculate
     try {
-      await fetch('/api/calculate', {
+      const response = await fetch('/api/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,9 +81,33 @@ export default function FareCalculator() {
           isNightTime: isNight,
         }),
       })
-    } catch {
-      // Silent fallback: client-side calculation remains active
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data && typeof data.finalFairPrice === 'number') {
+          setFare(data.finalFairPrice)
+          setHasCalculated(true)
+          setIsCalculating(false)
+          setError('')
+          return
+        }
+      } else {
+        const errData = await response.json()
+        if (errData && errData.error) {
+          setError(errData.error)
+          setIsCalculating(false)
+          return
+        }
+      }
+    } catch (err) {
+      console.warn('Backend API calculation offline, using client fallback calculation:', err)
     }
+
+    // Client-side fallback if backend API is offline
+    const result = calculateFareFallback(numDistance, isNight)
+    setFare(result)
+    setHasCalculated(true)
+    setIsCalculating(false)
   }
 
   const handleKeyDown = (e) => {
@@ -94,7 +117,7 @@ export default function FareCalculator() {
   }
 
   const baseFare = distance && parseFloat(distance) >= 0.1
-    ? calculateFare(parseFloat(distance), false)
+    ? calculateFareFallback(parseFloat(distance), false)
     : null
   const nightSurcharge = fare && isNight ? Math.ceil(fare - (fare / 1.15)) : null
 
@@ -204,6 +227,7 @@ export default function FareCalculator() {
           <button
             id="calculate-fare-btn"
             type="button"
+            disabled={isCalculating}
             onClick={handleCalculate}
             className="
               btn-pop w-full py-4 px-6 rounded-2xl font-bold text-sm text-white
@@ -211,11 +235,20 @@ export default function FareCalculator() {
               hover:from-blue-500 hover:via-indigo-500 hover:to-blue-600
               shadow-lg shadow-blue-500/25
               cursor-pointer flex items-center justify-center gap-2
-              border border-blue-500/20
+              border border-blue-500/20 disabled:opacity-75
             "
           >
-            <TrendingUp className="w-4 h-4" />
-            Calculate Fair Fare
+            {isCalculating ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Calculating...
+              </>
+            ) : (
+              <>
+                <TrendingUp className="w-4 h-4" />
+                Calculate Fair Fare
+              </>
+            )}
           </button>
 
           {/* Result Card */}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Shield, MapPin, Info, Star, Search, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import { Shield, MapPin, Info, Star, Search, RefreshCw, Wifi, WifiOff, PlusCircle } from 'lucide-react'
 import FareCalculator from './FareCalculator'
 import RouteCard from './RouteCard'
+import BenchmarkModal from './BenchmarkModal'
 import './index.css'
 
 // Default fallback benchmark routes in Sri Lanka
@@ -36,36 +37,6 @@ const DEFAULT_BENCHMARK_ROUTES = [
     scamAlert:
       'Common tourist route. Drivers often ask for LKR 1000+. Show them the standard rate.',
   },
-  {
-    id: 4,
-    route: 'Colombo Fort to Pettah Market',
-    origin: 'Colombo Fort',
-    destination: 'Pettah Market',
-    distanceKm: 1.2,
-    estimatedDayFareLkr: 128,
-    scamAlert:
-      'Tourists are routinely quoted LKR 300–500 for this short trip. Insist on LKR 128–150.',
-  },
-  {
-    id: 5,
-    route: 'Mirissa Beach to Weligama Town',
-    origin: 'Mirissa Beach',
-    destination: 'Weligama Town',
-    distanceKm: 4.5,
-    estimatedDayFareLkr: 425,
-    scamAlert:
-      'Coastal route popular with backpackers. Always agree on a price before boarding.',
-  },
-  {
-    id: 6,
-    route: 'Ella Town to Nine Arch Bridge',
-    origin: 'Ella Town',
-    destination: 'Nine Arch Bridge',
-    distanceKm: 2.5,
-    estimatedDayFareLkr: 245,
-    scamAlert:
-      'Heavily touristed route — drivers at Ella station often quote LKR 800+.',
-  },
 ]
 
 export default function App() {
@@ -73,6 +44,12 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isBackendConnected, setIsBackendConnected] = useState(false)
+
+  // Modal State for CRUD operations
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingRoute, setEditingRoute] = useState(null)
+  const [isSubmittingModal, setIsSubmittingModal] = useState(false)
+  const [serverErrors, setServerErrors] = useState(null)
 
   // Fetch benchmark routes from backend API with fallback
   const fetchBenchmarks = async (search = '') => {
@@ -84,7 +61,7 @@ export default function App() {
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const normalized = data.map((item) => {
             let origin = ''
             let destination = ''
@@ -97,13 +74,14 @@ export default function App() {
               destination = item.destination || ''
             }
             return {
-              id: item.id || `route-${Math.random()}`,
+              id: item.id || item._id || `route-${Math.random()}`,
               origin,
               destination,
               route: item.route,
               distanceKm: item.distanceKm,
-              estimatedDayFareLkr: item.estimatedDayFareLkr || item.estimatedFare || 0,
+              estimatedDayFareLkr: item.estimatedFare || item.estimatedDayFareLkr || 0,
               scamAlert: item.scamAlert,
+              comments: item.comments || [],
             }
           })
           setRoutes(normalized)
@@ -141,6 +119,79 @@ export default function App() {
     const query = e.target.value
     setSearchQuery(query)
     fetchBenchmarks(query)
+  }
+
+  // Open modal to Create a new route
+  const handleOpenCreateModal = () => {
+    setEditingRoute(null)
+    setServerErrors(null)
+    setIsModalOpen(true)
+  }
+
+  // Open modal to Edit an existing route
+  const handleOpenEditModal = (route) => {
+    setEditingRoute(route)
+    setServerErrors(null)
+    setIsModalOpen(true)
+  }
+
+  // Save (Create or Update) a benchmark route via API
+  const handleSaveRoute = async (formData) => {
+    setIsSubmittingModal(true)
+    setServerErrors(null)
+
+    try {
+      let response
+      if (editingRoute) {
+        // PUT /api/benchmarks/:id
+        response = await fetch(`/api/benchmarks/${editingRoute.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        })
+      } else {
+        // POST /api/benchmarks
+        const newId = Math.floor(1000 + Math.random() * 9000)
+        response = await fetch('/api/benchmarks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...formData, id: newId }),
+        })
+      }
+
+      if (response.ok) {
+        setIsSubmittingModal(false)
+        setIsModalOpen(false)
+        fetchBenchmarks(searchQuery)
+        return
+      } else {
+        const errorData = await response.json()
+        setServerErrors(errorData.details || errorData.error || 'Failed to save route benchmark.')
+      }
+    } catch (err) {
+      setServerErrors('Network error connecting to backend API.')
+    }
+    setIsSubmittingModal(false)
+  }
+
+  // Delete a benchmark route via API
+  const handleDeleteRoute = async (route) => {
+    if (!window.confirm(`Are you sure you want to delete "${route.route || route.origin}"?`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/benchmarks/${route.id}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        fetchBenchmarks(searchQuery)
+      } else {
+        alert('Failed to delete route benchmark.')
+      }
+    } catch {
+      alert('Network error deleting route benchmark.')
+    }
   }
 
   return (
@@ -256,19 +307,30 @@ export default function App() {
               </p>
             </div>
 
-            {/* Live Search Input connected to GET /api/benchmarks?search= */}
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search routes (e.g. Galle, Fort)..."
-                className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition shadow-xs font-medium"
-              />
-              {isLoading && (
-                <RefreshCw className="w-3.5 h-3.5 text-blue-600 absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin" />
-              )}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Add New Route Button */}
+              <button
+                onClick={handleOpenCreateModal}
+                className="btn-pop px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm cursor-pointer border border-blue-500/20"
+              >
+                <PlusCircle className="w-4 h-4" />
+                Add Route
+              </button>
+
+              {/* Live Search Input connected to GET /api/benchmarks?search= */}
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  placeholder="Search routes (e.g. Galle, Fort)..."
+                  className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition shadow-xs font-medium"
+                />
+                {isLoading && (
+                  <RefreshCw className="w-3.5 h-3.5 text-blue-600 absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin" />
+                )}
+              </div>
             </div>
           </div>
 
@@ -290,17 +352,36 @@ export default function App() {
               {routes.map((route) => (
                 <RouteCard
                   key={route.id}
+                  id={route.id}
                   origin={route.origin}
                   destination={route.destination}
                   route={route.route}
                   distanceKm={route.distanceKm}
                   estimatedDayFareLkr={route.estimatedDayFareLkr}
                   scamAlert={route.scamAlert}
+                  comments={route.comments || []}
+                  onEdit={() => handleOpenEditModal(route)}
+                  onDelete={() => handleDeleteRoute(route)}
+                  onCommentAdded={(routeId, updatedComments) => {
+                    setRoutes((prev) =>
+                      prev.map((r) => (r.id === routeId ? { ...r, comments: updatedComments } : r))
+                    )
+                  }}
                 />
               ))}
             </div>
           )}
         </section>
+
+        {/* Modal Dialog for Creating / Editing Benchmark Routes */}
+        <BenchmarkModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSaveRoute}
+          initialData={editingRoute}
+          isSubmitting={isSubmittingModal}
+          serverErrors={serverErrors}
+        />
 
         {/* ── FOOTER ────────────────────────────────────────────────── */}
         <footer className="mt-16 pt-8 border-t border-slate-200/80 text-center">

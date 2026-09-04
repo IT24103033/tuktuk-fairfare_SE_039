@@ -1,6 +1,8 @@
-import { MapPin, ArrowRight, AlertTriangle, Clock, DollarSign } from 'lucide-react'
+import { MapPin, ArrowRight, AlertTriangle, Clock, DollarSign, Edit3, Trash2 } from 'lucide-react'
+import CommentSection from './CommentSection'
 
 export default function RouteCard({
+  id,
   origin,
   destination,
   route,
@@ -8,6 +10,10 @@ export default function RouteCard({
   estimatedDayFareLkr,
   estimatedFare,
   scamAlert,
+  comments = [],
+  onEdit,
+  onDelete,
+  onCommentAdded,
 }) {
   let displayOrigin = origin
   let displayDestination = destination
@@ -32,20 +38,46 @@ export default function RouteCard({
       <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 group-hover:h-1.5 transition-all duration-200" />
 
       <div className="flex flex-col flex-1 p-5">
-        {/* Route header */}
-        <div className="flex items-center gap-2 mb-3.5">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
-            <span className="text-sm font-bold text-slate-900 truncate">{displayOrigin}</span>
+        {/* Route header with Edit and Delete buttons */}
+        <div className="flex items-start justify-between gap-2 mb-3.5">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <span className="text-sm font-bold text-slate-900 truncate">{displayOrigin}</span>
+            </div>
+            {displayDestination && (
+              <>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span className="text-sm font-bold text-slate-900 truncate">{displayDestination}</span>
+                </div>
+              </>
+            )}
           </div>
-          {displayDestination && (
-            <>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-              <div className="flex items-center gap-1.5 min-w-0">
-                <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span className="text-sm font-bold text-slate-900 truncate">{displayDestination}</span>
-              </div>
-            </>
+
+          {/* Action buttons */}
+          {(onEdit || onDelete) && (
+            <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition-opacity">
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  title="Edit route"
+                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  title="Delete route"
+                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -87,7 +119,17 @@ export default function RouteCard({
             <p className="text-xs text-amber-900/95 font-medium leading-relaxed">{scamAlert}</p>
           </div>
         )}
+
+        {/* Community Reports & Comments Section */}
+        <CommentSection
+          routeId={id}
+          comments={comments}
+          onCommentAdded={(updatedComments) => {
+            if (onCommentAdded) onCommentAdded(id, updatedComments)
+          }}
+        />
       </div>
     </article>
   )
 }
+

@@ -92,8 +92,120 @@ const createBenchmark = async (req, res) => {
     }
 };
 
+// Helper to query by numeric id or MongoDB _id
+const buildIdQuery = (idParam) => {
+    const isNum = !isNaN(Number(idParam));
+    const isObjId = Benchmark.base.Types.ObjectId.isValid(idParam);
+    const conditions = [];
+    if (isNum) conditions.push({ id: Number(idParam) });
+    if (isObjId) conditions.push({ _id: idParam });
+    return conditions.length > 0 ? { $or: conditions } : { id: -1 };
+};
+
+// Update an existing benchmark route in MongoDB Atlas
+const updateBenchmark = async (req, res) => {
+    try {
+        const idParam = req.params.id;
+        const query = buildIdQuery(idParam);
+        const { route, distanceKm, estimatedFare, scamAlert } = req.body;
+
+        const updated = await Benchmark.findOneAndUpdate(
+            query,
+            { route, distanceKm, estimatedFare, scamAlert },
+            { new: true, runValidators: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ error: "Benchmark route not found." });
+        }
+
+        res.status(200).json({
+            message: "Benchmark route updated successfully!",
+            benchmark: updated
+        });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({ error: "Validation Error", details: errors });
+        }
+        console.error('Error updating benchmark:', error.message);
+        res.status(500).json({ error: "Failed to update benchmark route." });
+    }
+};
+
+// Delete a benchmark route from MongoDB Atlas
+const deleteBenchmark = async (req, res) => {
+    try {
+        const idParam = req.params.id;
+        const query = buildIdQuery(idParam);
+
+        const deleted = await Benchmark.findOneAndDelete(query);
+
+        if (!deleted) {
+            return res.status(404).json({ error: "Benchmark route not found." });
+        }
+
+        res.status(200).json({
+            message: "Benchmark route deleted successfully!",
+            benchmark: deleted
+        });
+    } catch (error) {
+        console.error('Error deleting benchmark:', error.message);
+        res.status(500).json({ error: "Failed to delete benchmark route." });
+    }
+};
+
+// Add a community comment/scam report to a benchmark route
+const addCommentToBenchmark = async (req, res) => {
+    try {
+        const idParam = req.params.id;
+        const query = buildIdQuery(idParam);
+        const { author, text, tag } = req.body;
+
+        if (!author || !author.trim()) {
+            return res.status(400).json({ error: "Author name is required." });
+        }
+        if (!text || !text.trim()) {
+            return res.status(400).json({ error: "Comment text is required." });
+        }
+
+        const newComment = {
+            author: author.trim(),
+            text: text.trim(),
+            tag: ['scam', 'fair', 'tip'].includes(tag) ? tag : 'scam',
+            createdAt: new Date()
+        };
+
+        const updatedBenchmark = await Benchmark.findOneAndUpdate(
+            query,
+            { $push: { comments: newComment } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedBenchmark) {
+            return res.status(404).json({ error: "Benchmark route not found." });
+        }
+
+        res.status(201).json({
+            message: "Comment added successfully!",
+            comments: updatedBenchmark.comments,
+            comment: updatedBenchmark.comments[updatedBenchmark.comments.length - 1]
+        });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({ error: "Validation Error", details: errors });
+        }
+        console.error('Error adding comment:', error.message);
+        res.status(500).json({ error: "Failed to post comment." });
+    }
+};
+
 module.exports = {
     calculateFare,
     getBenchmarks,
-    createBenchmark
+    createBenchmark,
+    updateBenchmark,
+    deleteBenchmark,
+    addCommentToBenchmark
 };
